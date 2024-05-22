@@ -57,6 +57,15 @@ class SplashScreen extends StatelessWidget {
                   Text("2024",
                       style: MyText.body1(context)!
                           .copyWith(color: MyColors.grey_40)),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: 105,
+                    height: 4,
+                    child: LinearProgressIndicator(
+                      color: Colors.blue,
+                      backgroundColor: Colors.grey[300],
+                    ),
+                  ),
                 ],
               ),
             ),
