@@ -25,13 +25,16 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-  late BuildContext context;
-  int currentIndex = 0;
+
   @override
+  late BuildContext context;
+
+  int currentIndex = 0;
+
   final List<Widget> _screens = [
-    EventScreen(),
-    CheckInScreen(),
-    AttendanceScreen(),
+    const EventScreen(),
+    const CheckInScreen(),
+    const AttendanceScreen(),
   ];
 
   @override
