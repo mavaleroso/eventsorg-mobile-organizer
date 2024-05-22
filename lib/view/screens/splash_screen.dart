@@ -1,14 +1,15 @@
 import 'dart:async';
 
-import 'package:eventsorg_mobile_organizer/view/login_screen.dart';
+import 'package:eventsorg_mobile_organizer/view/screens/login_screen.dart';
+import 'package:eventsorg_mobile_organizer/view/screens/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../data/my_colors.dart';
-import '../data/img.dart';
-import './widgets/my_text.dart';
+import '../../data/my_colors.dart';
+import '../../data/img.dart';
+import '../widgets/my_text.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
