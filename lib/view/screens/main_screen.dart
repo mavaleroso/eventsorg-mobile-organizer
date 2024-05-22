@@ -7,8 +7,8 @@ import 'package:eventsorg_mobile_organizer/view/widgets/my_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../data/my_colors.dart';
-import './widgets/my_toast.dart';
+import '../../data/my_colors.dart';
+import '../widgets/my_toast.dart';
 
 class MainScreen extends StatefulWidget {
   MainScreen({super.key});

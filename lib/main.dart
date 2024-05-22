@@ -1,4 +1,4 @@
-import 'package:eventsorg_mobile_organizer/view/splash_screen.dart';
+import 'package:eventsorg_mobile_organizer/view/screens/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
