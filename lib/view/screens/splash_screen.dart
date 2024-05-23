@@ -20,7 +20,7 @@ class SplashScreen extends StatelessWidget {
       final prefs = await SharedPreferences.getInstance();
       final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
 
-      Get.to(() => const LoginScreen());
+      Get.to(() => isLoggedIn ? MainScreen() : const LoginScreen());
     });
     return Scaffold(
       backgroundColor: MyColors.grey_90,

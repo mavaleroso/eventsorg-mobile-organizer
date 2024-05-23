@@ -6,15 +6,18 @@ import 'package:shared_preferences/shared_preferences.dart';
 class CallApi {
   final String _url = baseUrl;
 
-  _getSharedPreferenceBaseUrl() async {
+  _getSharedPreferences() async {
     final prefs = await SharedPreferences.getInstance();
     final url = prefs.getString('BASE_URL') ?? _url;
-    return url;
+    final token = prefs.getString('token');
+
+    return {'url': url, 'token': token};
   }
 
-  _setHeaders() => {
+  _setHeaders(token) => {
         'Content-type': 'application/json',
         'Accept': 'application/json',
+        'Authorization': 'Bearer $token'
       };
 
   _errorHandler(res) {
@@ -61,13 +64,15 @@ class CallApi {
   }
 
   postData(data, apiUrl) async {
-    var baseUrl = await _getSharedPreferenceBaseUrl();
-    var fullUrl = baseUrl + apiUrl;
+    var preference = await _getSharedPreferences();
+
+    var fullUrl = preference['url'] + apiUrl;
+    var token = preference['token'];
 
     var response = await http.post(
       Uri.parse(fullUrl),
       body: json.encode(data),
-      headers: _setHeaders(),
+      headers: _setHeaders(token),
     );
 
     return _errorHandler(response);

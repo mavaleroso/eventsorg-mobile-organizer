@@ -6,6 +6,7 @@ import 'package:eventsorg_mobile_organizer/view/screens/event_screen.dart';
 import 'package:eventsorg_mobile_organizer/view/widgets/my_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/my_colors.dart';
 import '../widgets/my_toast.dart';
@@ -25,6 +26,21 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
+  String emailPref = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStoredValue();
+  }
+
+  Future<void> _loadStoredValue() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      emailPref = prefs.getString('email') ?? 'No value stored';
+    });
+  }
 
   @override
   late BuildContext context;
@@ -58,75 +74,24 @@ class _MainScreenState extends State<MainScreen> {
             }),
       ),
       drawer: Drawer(
+        width: 250,
         child: SingleChildScrollView(
           child: Column(
             children: <Widget>[
               SizedBox(
-                height: 200,
+                height: 100,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    Container(height: 30),
-                    CircleAvatar(
-                      radius: 32,
-                      backgroundColor: MyColors.grey_20,
-                      child: CircleAvatar(
-                        radius: 30,
-                        backgroundImage:
-                            AssetImage(Img.get("photo_male_6.jpg")),
-                      ),
-                    ),
-                    Container(height: 7),
-                    Text("Evans Collins",
-                        style: MyText.body2(context)!.copyWith(
-                            color: Colors.blueGrey[800],
-                            fontWeight: FontWeight.w500)),
-                    Container(height: 2),
-                    Text("evan.collins@mail.com",
+                    Container(height: 10),
+                    Text(emailPref,
                         style: MyText.caption(context)!.copyWith(
-                            color: MyColors.grey_20,
+                            color: MyColors.primaryDark,
                             fontWeight: FontWeight.w500))
                   ],
                 ),
               ),
               Container(height: 8),
-              InkWell(
-                onTap: () {},
-                child: Container(
-                  height: 40,
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    children: <Widget>[
-                      const Icon(Icons.domain,
-                          color: MyColors.grey_20, size: 20),
-                      Container(width: 20),
-                      Expanded(
-                          child: Text("Home",
-                              style: MyText.body2(context)!
-                                  .copyWith(color: MyColors.grey_80))),
-                    ],
-                  ),
-                ),
-              ),
-              Container(height: 10),
-              InkWell(
-                onTap: () {},
-                child: Container(
-                  height: 40,
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    children: <Widget>[
-                      const Icon(Icons.menu, color: MyColors.grey_20, size: 20),
-                      Container(width: 20),
-                      Expanded(
-                          child: Text("Settings",
-                              style: MyText.body2(context)!
-                                  .copyWith(color: MyColors.grey_80))),
-                    ],
-                  ),
-                ),
-              ),
-              Container(height: 10),
               InkWell(
                 onTap: () {},
                 child: Container(
