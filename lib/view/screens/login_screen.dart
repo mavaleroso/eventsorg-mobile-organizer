@@ -45,7 +45,7 @@ class _LoginScreenState extends State<LoginScreen> {
       'device_name': 'mobile',
     };
 
-    var res = await CallApi().postData(data, '/login');
+    var res = await CallApi().postData(data, 'login');
 
     if (res['code'] == 200) {
       Map<String, dynamic> decodedResponse = jsonDecode(res['data']);

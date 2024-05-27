@@ -5,19 +5,20 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class CallApi {
   final String _url = baseUrl;
+  late String _token = '';
+  final int timoutSeconds = 5;
 
-  _getSharedPreferences() async {
+  _getSharedPreferenceBaseUrl() async {
     final prefs = await SharedPreferences.getInstance();
     final url = prefs.getString('BASE_URL') ?? _url;
-    final token = prefs.getString('token');
-
-    return {'url': url, 'token': token};
+    _token = prefs.getString('token') ?? '';
+    return url;
   }
 
-  _setHeaders(token) => {
+  _setHeaders() => {
         'Content-type': 'application/json',
         'Accept': 'application/json',
-        'Authorization': 'Bearer $token'
+        'Authorization': 'Bearer $_token',
       };
 
   _errorHandler(res) {
@@ -25,8 +26,23 @@ class CallApi {
 
     switch (res.statusCode) {
       case 200:
+      case 201:
+      case 202:
         {
           data = res.body;
+        }
+        break;
+
+      case 401:
+        {
+          var arr = json.decode(res.body);
+          data = json.encode(arr['message']);
+        }
+        break;
+
+      case 404:
+        {
+          data = res.body ?? 'Server not found!';
         }
         break;
 
@@ -34,12 +50,6 @@ class CallApi {
         {
           var arr = json.decode(res.body);
           data = json.encode(arr['errors']);
-        }
-        break;
-
-      case 404:
-        {
-          data = 'Server not found!';
         }
         break;
 
@@ -64,17 +74,83 @@ class CallApi {
   }
 
   postData(data, apiUrl) async {
-    var preference = await _getSharedPreferences();
+    var baseUrl = await _getSharedPreferenceBaseUrl();
+    var fullUrl = baseUrl + apiUrl;
+    try {
+      var response = await http
+          .post(
+            Uri.parse(fullUrl),
+            body: json.encode(data),
+            headers: _setHeaders(),
+          )
+          .timeout(Duration(seconds: timoutSeconds));
+      return _errorHandler(response);
+    } catch (e) {
+      return {
+        'code': '101',
+        'data': 'Server not found!',
+      };
+    }
+  }
 
-    var fullUrl = preference['url'] + apiUrl;
-    var token = preference['token'];
+  putData(data, apiUrl) async {
+    var baseUrl = await _getSharedPreferenceBaseUrl();
+    var fullUrl = baseUrl + apiUrl;
 
-    var response = await http.post(
-      Uri.parse(fullUrl),
-      body: json.encode(data),
-      headers: _setHeaders(token),
-    );
+    try {
+      var response = await http
+          .put(
+            Uri.parse(fullUrl),
+            body: json.encode(data),
+            headers: _setHeaders(),
+          )
+          .timeout(Duration(seconds: timoutSeconds));
 
-    return _errorHandler(response);
+      return _errorHandler(response);
+    } catch (e) {
+      return {
+        'code': '404',
+        'data': 'Server not found!',
+      };
+    }
+  }
+
+  deleteData(apiUrl) async {
+    var baseUrl = await _getSharedPreferenceBaseUrl();
+    var fullUrl = baseUrl + apiUrl;
+
+    try {
+      var response = await http
+          .delete(
+            Uri.parse(fullUrl),
+            headers: _setHeaders(),
+          )
+          .timeout(Duration(seconds: timoutSeconds));
+
+      return _errorHandler(response);
+    } catch (e) {
+      return {
+        'code': '404',
+        'data': 'Server not found!',
+      };
+    }
+  }
+
+  getData(apiUrl) async {
+    var baseUrl = await _getSharedPreferenceBaseUrl();
+    var fullUrl = baseUrl + apiUrl;
+
+    try {
+      var response = await http.get(
+        Uri.parse(fullUrl),
+        headers: _setHeaders(),
+      );
+      return _errorHandler(response);
+    } catch (e) {
+      return {
+        'code': '404',
+        'data': 'Server not found!',
+      };
+    }
   }
 }
