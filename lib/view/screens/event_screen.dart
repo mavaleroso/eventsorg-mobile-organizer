@@ -2,9 +2,11 @@ import 'dart:convert';
 
 import 'package:eventsorg_mobile_organizer/data/events_data.dart';
 import 'package:eventsorg_mobile_organizer/data/my_colors.dart';
+import 'package:eventsorg_mobile_organizer/data/my_strings.dart';
 import 'package:eventsorg_mobile_organizer/model/events_model.dart';
 import 'package:eventsorg_mobile_organizer/view/screens/event_form_screen.dart';
 import 'package:eventsorg_mobile_organizer/view/widgets/my_text.dart';
+import 'package:eventsorg_mobile_organizer/view/widgets/my_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -118,7 +120,7 @@ class _EventScreenState extends State<EventScreen> {
                   IconButton(
                     onPressed: () {
                       setState(() {
-                        Get.to(const EventFormScreen());
+                        Get.to(EventFormScreen(id: 0));
                       });
                     },
                     icon: const Icon(Icons.add),
@@ -240,7 +242,7 @@ class _EventScreenState extends State<EventScreen> {
                                 ),
                                 IconButton(
                                     onPressed: () {
-                                      showSheet(context);
+                                      showSheet(context, event.id);
                                     },
                                     icon: const Icon(
                                         Icons.format_list_bulleted_rounded))
@@ -256,7 +258,7 @@ class _EventScreenState extends State<EventScreen> {
     );
   }
 
-  void showSheet(context) {
+  void showSheet(context, eventId) {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext bc) {
@@ -273,15 +275,103 @@ class _EventScreenState extends State<EventScreen> {
               ListTile(
                 leading: const Icon(Icons.edit_calendar_outlined),
                 title: const Text("Edit"),
-                onTap: () {},
+                onTap: () {
+                  Get.to(EventFormScreen(id: eventId));
+                },
               ),
               ListTile(
                 leading: const Icon(Icons.delete),
                 title: const Text("Delete"),
-                onTap: () {},
+                onTap: () {
+                  Navigator.pop(context);
+                  deleteEvent(context, eventId);
+                },
               ),
             ],
           ),
+        );
+      },
+    );
+  }
+
+  void deleteEvent(context, eventId) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Confirm action"),
+          content: const Text("Are you sure you want to delete this event?"),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('NO'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('YES'),
+              onPressed: () async {
+                var response = await EventsData().deleteEvent(eventId);
+
+                if (response['code'] == 200 || response['code'] == 201) {
+                  fetchEventsData(paginationCurrentPage);
+
+                  MyToast.showCustom(
+                      context,
+                      Container(
+                        height: 50,
+                        decoration: BoxDecoration(
+                            color: Colors.green[500],
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(30))),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 15, vertical: 12),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                            const Icon(Icons.done,
+                                color: Colors.white, size: 20),
+                            Container(width: 10),
+                            Text("Successfully deleted!",
+                                style: MyText.body1(context)!
+                                    .copyWith(color: MyColors.grey_5)),
+                            Container(width: 8),
+                          ],
+                        ),
+                      ));
+                } else {
+                  MyToast.showCustom(
+                      context,
+                      Container(
+                        height: 50,
+                        decoration: BoxDecoration(
+                            color: Colors.red[600],
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(30))),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 15, vertical: 12),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                            const Icon(Icons.close,
+                                color: Colors.white, size: 20),
+                            Container(width: 10),
+                            Text("Error encountered!",
+                                style: MyText.body1(context)!
+                                    .copyWith(color: MyColors.grey_5)),
+                            Container(width: 8),
+                          ],
+                        ),
+                      ));
+                }
+
+                Navigator.of(context).pop();
+              },
+            )
+          ],
         );
       },
     );

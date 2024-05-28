@@ -10,6 +10,7 @@ class EventsModel {
 
   factory EventsModel.fromJson(Map<String, dynamic> json) {
     return EventsModel(
+      id: json['id'],
       name: json['name'],
       location: json['location'],
       startDate: json['start_date'],

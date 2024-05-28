@@ -15,4 +15,19 @@ class EventsData {
     var res = await CallApi().postData(data, 'events');
     return res;
   }
+
+  getEvent(id) async {
+    var res = await CallApi().getData('events/$id');
+    return res;
+  }
+
+  updateEvent(id, data) async {
+    var res = await CallApi().putData(data, 'events/$id');
+    return res;
+  }
+
+  deleteEvent(id) async {
+    var res = await CallApi().deleteData('events/$id');
+    return res;
+  }
 }

@@ -54,7 +54,7 @@ class _LoginScreenState extends State<LoginScreen> {
       prefs.setBool('isLoggedIn', true);
       prefs.setString('email', email);
       prefs.setString('token', token);
-      Get.to(() => MainScreen());
+      Get.to(() => MainScreen(currentIndex: 0));
       setState(() {
         invalidEntries = false;
         invalidCredentials = false;

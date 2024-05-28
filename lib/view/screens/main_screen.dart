@@ -15,7 +15,9 @@ import '../../data/my_colors.dart';
 import '../widgets/my_toast.dart';
 
 class MainScreen extends StatefulWidget {
-  MainScreen({super.key});
+  int currentIndex = 0;
+
+  MainScreen({super.key, required this.currentIndex});
 
   final List<BottomNav> itemsNav = <BottomNav>[
     BottomNav('Events', Icons.event, null),
@@ -61,7 +63,6 @@ class _MainScreenState extends State<MainScreen> {
   @override
   late BuildContext context;
 
-  int currentIndex = 0;
   String title = 'Events';
 
   final List<Widget> _screens = [
@@ -86,7 +87,7 @@ class _MainScreenState extends State<MainScreen> {
         backgroundColor: Colors.grey[200],
         appBar: AppBar(
           title: Text(
-            titles[currentIndex],
+            titles[widget.currentIndex],
             style: MyText.title(context)!.copyWith(color: MyColors.grey_3),
           ),
           centerTitle: true,
@@ -146,15 +147,15 @@ class _MainScreenState extends State<MainScreen> {
             ),
           ),
         ),
-        body: _screens[currentIndex],
+        body: _screens[widget.currentIndex],
         bottomNavigationBar: BottomNavigationBar(
           backgroundColor: Colors.white,
           selectedItemColor: MyColors.primary,
           unselectedItemColor: MyColors.grey_40,
-          currentIndex: currentIndex,
+          currentIndex: widget.currentIndex,
           onTap: (int index) {
             setState(() {
-              currentIndex = index;
+              widget.currentIndex = index;
             });
           },
           items: widget.itemsNav.map((BottomNav d) {
