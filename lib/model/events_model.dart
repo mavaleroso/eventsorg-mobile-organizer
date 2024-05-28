@@ -5,13 +5,23 @@ class EventsModel {
   String? startDate;
   String? endDate;
 
-  EventsModel({this.id, this.name, this.startDate, this.endDate});
+  EventsModel(
+      {this.id, this.name, this.location, this.startDate, this.endDate});
 
-  EventsModel.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    name = json['name'];
-    location = json['location'];
-    startDate = json['start_date'];
-    endDate = json['end_date'];
+  factory EventsModel.fromJson(Map<String, dynamic> json) {
+    return EventsModel(
+      name: json['name'],
+      location: json['location'],
+      startDate: json['start_date'],
+      endDate: json['end_date'],
+    );
+  }
+
+  void reset() {
+    id = 0;
+    name = '';
+    location = '';
+    startDate = '';
+    endDate = '';
   }
 }

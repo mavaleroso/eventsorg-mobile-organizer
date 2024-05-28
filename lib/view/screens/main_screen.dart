@@ -115,7 +115,7 @@ class _MainScreenState extends State<MainScreen> {
                     children: <Widget>[
                       Container(height: 10),
                       Text(emailPref,
-                          style: MyText.caption(context)!.copyWith(
+                          style: MyText.medium(context)!.copyWith(
                               color: MyColors.primaryDark,
                               fontWeight: FontWeight.w500))
                     ],

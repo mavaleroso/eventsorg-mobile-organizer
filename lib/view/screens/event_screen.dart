@@ -3,30 +3,10 @@ import 'dart:convert';
 import 'package:eventsorg_mobile_organizer/data/events_data.dart';
 import 'package:eventsorg_mobile_organizer/data/my_colors.dart';
 import 'package:eventsorg_mobile_organizer/model/events_model.dart';
+import 'package:eventsorg_mobile_organizer/view/screens/event_form_screen.dart';
 import 'package:eventsorg_mobile_organizer/view/widgets/my_text.dart';
 import 'package:flutter/material.dart';
-
-class EventsParams {
-  // ignore: non_constant_identifier_names
-  // late String start_date;
-  // ignore: non_constant_identifier_names
-  // late String end_date;
-  late int page;
-
-  EventsParams(this.page);
-
-  // void updateStartDate(String newStartDate) {
-  //   start_date = newStartDate;
-  // }
-
-  // void updateEndDate(String newEndDate) {
-  //   end_date = newEndDate;
-  // }
-
-  void updatePage(int newPage) {
-    page = newPage;
-  }
-}
+import 'package:get/get.dart';
 
 class EventScreen extends StatefulWidget {
   const EventScreen({super.key});
@@ -45,7 +25,19 @@ class _EventScreenState extends State<EventScreen> {
   String paginationNextLink = '';
   int paginationCurrentPage = 1;
 
-  late Future<List<EventsModel>> eventsFuture = getEvents(1);
+  late Future<List<EventsModel>> eventsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchEventsData(1);
+  }
+
+  Future<void> fetchEventsData(page) async {
+    setState(() {
+      eventsFuture = getEvents(page);
+    });
+  }
 
   Future<List<EventsModel>> getEvents(page) async {
     var response = await EventsData().getEventsList(page);
@@ -67,25 +59,75 @@ class _EventScreenState extends State<EventScreen> {
     this.context = context;
     return Scaffold(
         backgroundColor: Colors.white,
-        body: RefreshIndicator(
-          onRefresh: () async {
-            getEvents(3);
-          },
-          child: Center(
-            child: FutureBuilder(
-              future: eventsFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const CircularProgressIndicator();
-                } else if (snapshot.hasData) {
-                  var events = snapshot.data!;
-                  return buildEvents(events);
-                } else {
-                  return const Text("No data available");
-                }
-              },
+        body: Column(
+          children: [
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: () async {
+                  fetchEventsData(paginationCurrentPage);
+                },
+                child: Center(
+                  child: FutureBuilder(
+                    future: eventsFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const CircularProgressIndicator();
+                      } else if (snapshot.hasData) {
+                        var events = snapshot.data!;
+                        return buildEvents(events);
+                      } else {
+                        return const Text("No data available");
+                      }
+                    },
+                  ),
+                ),
+              ),
             ),
-          ),
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
+              color: MyColors.grey_3,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      if (paginationCurrentPage > 1 &&
+                          paginationPrevLink != '') {
+                        fetchEventsData(paginationCurrentPage - 1);
+                      }
+                    },
+                    icon: const Icon(Icons.arrow_left),
+                    iconSize: 35,
+                  ),
+                  Text(
+                    '$paginationFrom - $paginationTo of $paginationTotal items',
+                    style: MyText.body2(context)!
+                        .copyWith(color: MyColors.grey_90),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      if (paginationNextLink != '') {
+                        fetchEventsData(paginationCurrentPage + 1);
+                      }
+                    },
+                    icon: const Icon(Icons.arrow_right),
+                    iconSize: 35,
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        Get.to(const EventFormScreen());
+                      });
+                    },
+                    icon: const Icon(Icons.add),
+                    iconSize: 35,
+                  ),
+                ],
+              ),
+            ),
+          ],
         ));
   }
 
@@ -208,40 +250,6 @@ class _EventScreenState extends State<EventScreen> {
                     )),
               );
             },
-          ),
-        ),
-        Container(
-          padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
-          color: MyColors.grey_3,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              IconButton(
-                onPressed: () {
-                  if (paginationCurrentPage > 1) {}
-                },
-                icon: const Icon(Icons.arrow_left),
-                iconSize: 35,
-              ),
-              Text(
-                '$paginationFrom - $paginationTo of $paginationTotal items',
-                style: MyText.body2(context)!.copyWith(color: MyColors.grey_90),
-              ),
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.arrow_right),
-                iconSize: 35,
-              ),
-              const Spacer(),
-              IconButton(
-                onPressed: () {
-                  setState(() {});
-                },
-                icon: const Icon(Icons.add),
-                iconSize: 35,
-              ),
-            ],
           ),
         ),
       ],

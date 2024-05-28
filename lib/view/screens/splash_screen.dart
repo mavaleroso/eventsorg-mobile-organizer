@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:eventsorg_mobile_organizer/view/screens/event_form_screen.dart';
 import 'package:eventsorg_mobile_organizer/view/screens/login_screen.dart';
 import 'package:eventsorg_mobile_organizer/view/screens/main_screen.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +21,7 @@ class SplashScreen extends StatelessWidget {
       final prefs = await SharedPreferences.getInstance();
       final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
 
-      Get.to(() => isLoggedIn ? MainScreen() : const LoginScreen());
+      Get.to(() => isLoggedIn ? EventFormScreen() : const LoginScreen());
     });
     return Scaffold(
       backgroundColor: MyColors.grey_90,
