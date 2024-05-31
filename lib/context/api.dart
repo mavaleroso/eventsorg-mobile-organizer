@@ -76,6 +76,7 @@ class CallApi {
   postData(data, apiUrl) async {
     var baseUrl = await _getSharedPreferenceBaseUrl();
     var fullUrl = baseUrl + apiUrl;
+
     try {
       var response = await http
           .post(
@@ -84,6 +85,7 @@ class CallApi {
             headers: _setHeaders(),
           )
           .timeout(Duration(seconds: timoutSeconds));
+
       return _errorHandler(response);
     } catch (e) {
       return {

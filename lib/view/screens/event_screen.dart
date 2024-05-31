@@ -5,6 +5,7 @@ import 'package:eventsorg_mobile_organizer/data/my_colors.dart';
 import 'package:eventsorg_mobile_organizer/data/my_strings.dart';
 import 'package:eventsorg_mobile_organizer/model/events_model.dart';
 import 'package:eventsorg_mobile_organizer/view/screens/event_form_screen.dart';
+import 'package:eventsorg_mobile_organizer/view/screens/event_view_screen.dart';
 import 'package:eventsorg_mobile_organizer/view/widgets/my_text.dart';
 import 'package:eventsorg_mobile_organizer/view/widgets/my_toast.dart';
 import 'package:flutter/material.dart';
@@ -120,7 +121,7 @@ class _EventScreenState extends State<EventScreen> {
                   IconButton(
                     onPressed: () {
                       setState(() {
-                        Get.to(EventFormScreen(id: 0));
+                        Get.to(() => EventFormScreen(id: 0));
                       });
                     },
                     icon: const Icon(Icons.add),
@@ -268,15 +269,22 @@ class _EventScreenState extends State<EventScreen> {
           child: Wrap(
             children: <Widget>[
               ListTile(
+                leading: const Icon(Icons.qr_code),
+                title: const Text("Scan"),
+                onTap: () {},
+              ),
+              ListTile(
                 leading: const Icon(Icons.calendar_view_month),
                 title: const Text("View"),
-                onTap: () {},
+                onTap: () {
+                  Get.to(() => EventViewScreen(id: eventId));
+                },
               ),
               ListTile(
                 leading: const Icon(Icons.edit_calendar_outlined),
                 title: const Text("Edit"),
                 onTap: () {
-                  Get.to(EventFormScreen(id: eventId));
+                  Get.to(() => EventFormScreen(id: eventId));
                 },
               ),
               ListTile(
