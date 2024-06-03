@@ -229,11 +229,16 @@ class _EventViewScreenState extends State<EventViewScreen> {
                                   ConnectionState.waiting) {
                                 return const Center(
                                     child: CircularProgressIndicator());
-                              } else if (snapshot.hasData) {
+                              } else if (snapshot.hasData &&
+                                  snapshot.data!.isNotEmpty) {
                                 var user = snapshot.data!;
                                 return buildContent(user);
+                              } else if (snapshot.data!.isEmpty) {
+                                return const Center(
+                                    child: Text("No user member"));
                               } else {
-                                return const Text("No data available");
+                                return const Center(
+                                    child: Text("No data available"));
                               }
                             },
                           ),
