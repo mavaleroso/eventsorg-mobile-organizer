@@ -25,8 +25,10 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   String paginationNextLink = '';
   int paginationCurrentPage = 1;
   EventsModel? _selectedValue;
+  int? eventIdVar;
 
   late Future<List<EventsModel>> eventsFuture;
+  Future<List<AttendanceModel>>? attendanceFuture;
 
   @override
   void initState() {
@@ -40,8 +42,15 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     });
   }
 
-  Future<List<AttendanceModel>> getAttendance(page) async {
-    var response = await AttendanceData().getAttendanceList(page, 52);
+  Future<List<EventsModel>> getEvents(page) async {
+    var response = await EventsData().getEventsList(page);
+    var data = json.decode(response['data']);
+    List body = data['data'];
+    return body.map((e) => EventsModel.fromJson(e)).toList();
+  }
+
+  Future<List<AttendanceModel>> getAttendance(page, eventId) async {
+    var response = await AttendanceData().getAttendanceList(page, eventId);
     var data = json.decode(response['data']);
     List body = data['data'];
     setState(() {
@@ -51,16 +60,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       paginationPrevLink = data['links']['prev'] ?? '';
       paginationNextLink = data['links']['next'] ?? '';
       paginationCurrentPage = data['meta']['current_page'] ?? 1;
+      eventIdVar = eventId;
     });
     return body.map((e) => AttendanceModel.fromJson(e)).toList();
-  }
-
-  Future<List<EventsModel>> getEvents(page) async {
-    var response = await EventsData().getEventsList(page);
-    var data = json.decode(response['data']);
-    List body = data['data'];
-    print(body[0]['id']);
-    return body.map((e) => EventsModel.fromJson(e)).toList();
   }
 
   @override
@@ -72,9 +74,12 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           future: eventsFuture,
           builder: (context, eventSnapshot) {
             if (eventSnapshot.connectionState == ConnectionState.waiting) {
-              return const CircularProgressIndicator();
+              return const Center(child: CircularProgressIndicator());
             } else if (eventSnapshot.hasData) {
               var events = eventSnapshot.data!;
+              _selectedValue ??= eventSnapshot.data!.first;
+              attendanceFuture ??=
+                  getAttendance(paginationCurrentPage, _selectedValue?.id);
               return Column(
                 children: [
                   Card(
@@ -91,9 +96,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                           labelText: 'Event',
                           isDense: true,
                         ),
-                        items: eventSnapshot.data!
-                            .map<DropdownMenuItem<EventsModel>>(
-                                (EventsModel item) {
+                        items: events.map<DropdownMenuItem<EventsModel>>(
+                            (EventsModel item) {
                           return DropdownMenuItem<EventsModel>(
                             value: item,
                             child: Text(item.name!),
@@ -102,6 +106,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                         onChanged: (EventsModel? value) {
                           setState(() {
                             _selectedValue = value;
+                            attendanceFuture = getAttendance(
+                                paginationCurrentPage, _selectedValue?.id);
                           });
                         },
                         value: _selectedValue,
@@ -109,25 +115,21 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                     ),
                   ),
                   Expanded(
-                    child: RefreshIndicator(
-                      onRefresh: () async {
-                        getAttendance(paginationCurrentPage);
-                      },
-                      child: Center(
-                        child: FutureBuilder(
-                          future: getAttendance(paginationCurrentPage),
-                          builder: (context, attendanceSnapshot) {
-                            if (attendanceSnapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return const CircularProgressIndicator();
-                            } else if (attendanceSnapshot.hasData) {
-                              var events = attendanceSnapshot.data!;
-                              return buildEvents(events);
-                            } else {
-                              return const Text("No data available");
-                            }
-                          },
-                        ),
+                    child: Center(
+                      child: FutureBuilder(
+                        future: attendanceFuture,
+                        builder: (context, attendanceSnapshot) {
+                          if (attendanceSnapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const CircularProgressIndicator();
+                          } else if (attendanceSnapshot.hasData &&
+                              attendanceSnapshot.data!.isNotEmpty) {
+                            var attendance = attendanceSnapshot.data!;
+                            return buildAttendance(attendance);
+                          } else {
+                            return const Text("No attendance currently");
+                          }
+                        },
                       ),
                     ),
                   ),
@@ -143,7 +145,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                           onPressed: () {
                             if (paginationCurrentPage > 1 &&
                                 paginationPrevLink != '') {
-                              getAttendance(paginationCurrentPage - 1);
+                              getAttendance(
+                                  paginationCurrentPage - 1, eventIdVar);
                             }
                           },
                           icon: const Icon(Icons.arrow_left),
@@ -157,7 +160,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                         IconButton(
                           onPressed: () {
                             if (paginationNextLink != '') {
-                              getAttendance(paginationCurrentPage + 1);
+                              getAttendance(
+                                  paginationCurrentPage + 1, eventIdVar);
                             }
                           },
                           icon: const Icon(Icons.arrow_right),
@@ -169,13 +173,13 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 ],
               );
             } else {
-              return const Text("No data available");
+              return const Center(child: Text("No events available"));
             }
           }),
     );
   }
 
-  Widget buildEvents(List<AttendanceModel> attendance) {
+  Widget buildAttendance(List<AttendanceModel> attendance) {
     return Column(
       children: [
         Expanded(
