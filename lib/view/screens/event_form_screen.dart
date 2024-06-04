@@ -296,6 +296,8 @@ class _EventFormScreenState extends State<EventFormScreen> {
               ],
             ),
           ));
+
+      if (res['code'] == 422) {}
     }
 
     setState(() {

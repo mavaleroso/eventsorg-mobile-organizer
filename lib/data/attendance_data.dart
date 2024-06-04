@@ -6,4 +6,18 @@ class AttendanceData {
         'attendance?page=$page&limit=10&event_id=$eventId&status=today');
     return res;
   }
+
+  admitUser(type, eventId, code, isPaid) async {
+    var data = {
+      'event_id': eventId,
+      'id_no': type == 'qr' ? code : null,
+      'plate_no': type != 'qr' ? code : null,
+      'is_paid': isPaid
+    };
+
+    var res = await CallApi().postData(data, 'admit');
+
+    print(res);
+    return res;
+  }
 }

@@ -83,6 +83,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
               return Column(
                 children: [
                   Card(
+                    margin: const EdgeInsets.all(0),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(0)),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                           vertical: 10, horizontal: 20),

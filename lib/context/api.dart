@@ -33,6 +33,11 @@ class CallApi {
         }
         break;
 
+      case 400:
+        {
+          data = res.body ?? 'Unknown Error!';
+        }
+
       case 401:
         {
           var arr = json.decode(res.body);
