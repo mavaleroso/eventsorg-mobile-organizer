@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:camera/camera.dart';
 import 'package:eventsorg_mobile_organizer/data/attendance_data.dart';
 import 'package:eventsorg_mobile_organizer/data/events_data.dart';
 import 'package:eventsorg_mobile_organizer/data/my_colors.dart';
@@ -24,6 +25,7 @@ class _CheckInScreenState extends State<CheckInScreen> {
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   EventsModel? _selectedValue;
   late Future<List<EventsModel>> eventsFuture;
+  bool isQrView = true;
 
   @override
   void initState() {
@@ -58,7 +60,10 @@ class _CheckInScreenState extends State<CheckInScreen> {
     return Scaffold(
       body: Column(
         children: <Widget>[
-          Expanded(flex: 3, child: _buildQrView(context)),
+          Expanded(
+            flex: 3,
+            child: _buildQrView(context),
+          ),
           Expanded(
             flex: 1,
             child: Padding(
@@ -119,27 +124,36 @@ class _CheckInScreenState extends State<CheckInScreen> {
                         margin: const EdgeInsets.all(8),
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30.0),
-                            ),
+                            backgroundColor:
+                                isQrView ? Colors.blue : Colors.white70,
                           ),
-                          onPressed: () async {
-                            await controller?.pauseCamera();
+                          onPressed: () {
+                            setState(() {
+                              isQrView = true;
+                            });
                           },
                           child: Icon(
                             Icons.qr_code_scanner_rounded,
-                            color: Colors.white,
+                            color: isQrView ? Colors.white : MyColors.grey_90,
                           ),
                         ),
                       ),
                       Container(
                         margin: const EdgeInsets.all(8),
                         child: ElevatedButton(
-                          onPressed: () async {
-                            await controller?.resumeCamera();
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                !isQrView ? Colors.blue : Colors.white70,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              isQrView = false;
+                            });
                           },
-                          child: Icon(Icons.car_repair),
+                          child: Icon(
+                            Icons.car_repair,
+                            color: !isQrView ? Colors.white : MyColors.grey_90,
+                          ),
                         ),
                       )
                     ],
@@ -161,37 +175,52 @@ class _CheckInScreenState extends State<CheckInScreen> {
         : 300.0;
     // To ensure the Scanner view is properly sizes after rotation
     // we need to listen for Flutter SizeChanged notification and update controller
-    return QRView(
-      key: qrKey,
-      onQRViewCreated: _onQRViewCreated,
-      overlay: QrScannerOverlayShape(
-          borderColor: Colors.blue,
-          borderRadius: 10,
-          borderLength: 30,
-          borderWidth: 10,
-          cutOutSize: scanArea),
-      onPermissionSet: (ctrl, p) => _onPermissionSet(context, ctrl, p),
-    );
-  }
-
-  Widget _buildPlateScanningView(BuildContext context) {
-    return Scaffold(body: Text('test'));
+    return Stack(children: [
+      Expanded(
+        child: QRView(
+          key: qrKey,
+          onQRViewCreated: _onQRViewCreated,
+          overlay: QrScannerOverlayShape(
+              borderColor: Colors.blue,
+              borderRadius: 10,
+              borderLength: 30,
+              borderWidth: 10,
+              cutOutSize: scanArea),
+          onPermissionSet: (ctrl, p) => _onPermissionSet(context, ctrl, p),
+        ),
+      ),
+      !isQrView
+          ? Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: FloatingActionButton(
+                  backgroundColor: Colors.white,
+                  onPressed: () {},
+                  child: Icon(Icons.camera),
+                ),
+              ),
+            )
+          : const SizedBox(),
+    ]);
   }
 
   void _onQRViewCreated(QRViewController controller) {
-    setState(() {
-      this.controller = controller;
-    });
-    controller.scannedDataStream.listen((scanData) {
-      controller?.pauseCamera();
-      print(scanData?.code);
-
-      admitUser('qr', scanData?.code);
-
+    if (isQrView) {
       setState(() {
-        result = scanData;
+        this.controller = controller;
       });
-    });
+      controller.scannedDataStream.listen((scanData) {
+        controller?.pauseCamera();
+        print(scanData?.code);
+
+        admitUser('qr', scanData?.code);
+
+        setState(() {
+          result = scanData;
+        });
+      });
+    }
   }
 
   void _onPermissionSet(BuildContext context, QRViewController ctrl, bool p) {
