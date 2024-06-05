@@ -8,7 +8,6 @@ import 'package:eventsorg_mobile_organizer/data/my_colors.dart';
 import 'package:eventsorg_mobile_organizer/model/events_model.dart';
 import 'package:eventsorg_mobile_organizer/view/widgets/my_text.dart';
 import 'package:eventsorg_mobile_organizer/view/widgets/my_toast.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
@@ -112,51 +111,6 @@ class _CheckInScreenState extends State<CheckInScreen> {
                           }),
                     ),
                   ),
-                  // if (result != null)
-                  //   Text(
-                  //       // ignore: deprecated_member_use
-                  //       'Barcode Type: ${describeEnum(result!.format)}   Data: ${result!.code}')
-                  // else
-                  //   const Text('Scan a code'),
-                  // Row(
-                  //   mainAxisAlignment: MainAxisAlignment.center,
-                  //   crossAxisAlignment: CrossAxisAlignment.center,
-                  //   children: <Widget>[
-                  //     Container(
-                  //       margin: const EdgeInsets.all(8),
-                  //       child: ElevatedButton(
-                  //           onPressed: () async {
-                  //             await controller?.toggleFlash();
-                  //             setState(() {});
-                  //           },
-                  //           child: FutureBuilder(
-                  //             future: controller?.getFlashStatus(),
-                  //             builder: (context, snapshot) {
-                  //               return Text('Flash: ${snapshot.data}');
-                  //             },
-                  //           )),
-                  //     ),
-                  //     Container(
-                  //       margin: const EdgeInsets.all(8),
-                  //       child: ElevatedButton(
-                  //           onPressed: () async {
-                  //             await controller?.flipCamera();
-                  //             setState(() {});
-                  //           },
-                  //           child: FutureBuilder(
-                  //             future: controller?.getCameraInfo(),
-                  //             builder: (context, snapshot) {
-                  //               if (snapshot.data != null) {
-                  //                 return Text(
-                  //                     'Camera facing ${describeEnum(snapshot.data!)}');
-                  //               } else {
-                  //                 return const Text('loading');
-                  //               }
-                  //             },
-                  //           )),
-                  //     )
-                  //   ],
-                  // ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -164,11 +118,19 @@ class _CheckInScreenState extends State<CheckInScreen> {
                       Container(
                         margin: const EdgeInsets.all(8),
                         child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30.0),
+                            ),
+                          ),
                           onPressed: () async {
                             await controller?.pauseCamera();
                           },
-                          child: const Text('QR code',
-                              style: TextStyle(fontSize: 15)),
+                          child: Icon(
+                            Icons.qr_code_scanner_rounded,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                       Container(
@@ -177,8 +139,7 @@ class _CheckInScreenState extends State<CheckInScreen> {
                           onPressed: () async {
                             await controller?.resumeCamera();
                           },
-                          child: const Text('Plate Number',
-                              style: TextStyle(fontSize: 15)),
+                          child: Icon(Icons.car_repair),
                         ),
                       )
                     ],
@@ -211,6 +172,10 @@ class _CheckInScreenState extends State<CheckInScreen> {
           cutOutSize: scanArea),
       onPermissionSet: (ctrl, p) => _onPermissionSet(context, ctrl, p),
     );
+  }
+
+  Widget _buildPlateScanningView(BuildContext context) {
+    return Scaffold(body: Text('test'));
   }
 
   void _onQRViewCreated(QRViewController controller) {
