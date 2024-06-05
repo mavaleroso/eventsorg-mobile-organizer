@@ -1,17 +1,24 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:camera/camera.dart';
+import 'package:eventsorg_mobile_organizer/controller/state_controller.dart';
 import 'package:eventsorg_mobile_organizer/data/attendance_data.dart';
 import 'package:eventsorg_mobile_organizer/data/events_data.dart';
 import 'package:eventsorg_mobile_organizer/data/my_colors.dart';
 import 'package:eventsorg_mobile_organizer/model/events_model.dart';
+import 'package:eventsorg_mobile_organizer/view/screens/check_in_plate_screen.dart';
+import 'package:eventsorg_mobile_organizer/view/screens/check_in_qr_screen.dart';
 import 'package:eventsorg_mobile_organizer/view/widgets/my_text.dart';
 import 'package:eventsorg_mobile_organizer/view/widgets/my_toast.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
+// ignore: must_be_immutable
 class CheckInScreen extends StatefulWidget {
   const CheckInScreen({super.key});
 
@@ -20,9 +27,6 @@ class CheckInScreen extends StatefulWidget {
 }
 
 class _CheckInScreenState extends State<CheckInScreen> {
-  Barcode? result;
-  QRViewController? controller;
-  final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   EventsModel? _selectedValue;
   late Future<List<EventsModel>> eventsFuture;
   bool isQrView = true;
@@ -47,22 +51,16 @@ class _CheckInScreenState extends State<CheckInScreen> {
   }
 
   @override
-  void reassemble() {
-    super.reassemble();
-    if (Platform.isAndroid) {
-      controller!.pauseCamera();
-    }
-    controller!.resumeCamera();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final StateController stateController = Get.find();
+
     return Scaffold(
       body: Column(
         children: <Widget>[
           Expanded(
             flex: 3,
-            child: _buildQrView(context),
+            child:
+                isQrView ? const CheckInQrScreen() : const CheckInPlateScreen(),
           ),
           Expanded(
             flex: 1,
@@ -83,7 +81,14 @@ class _CheckInScreenState extends State<CheckInScreen> {
                                   child: CircularProgressIndicator());
                             } else if (eventSnapshot.hasData) {
                               var events = eventSnapshot.data!;
-                              _selectedValue ??= eventSnapshot.data!.first;
+                              if (stateController.eventId != 0) {
+                                _selectedValue = eventSnapshot.data
+                                    ?.where((test) =>
+                                        test.id == stateController.eventId)
+                                    .first;
+                              } else {
+                                _selectedValue = eventSnapshot.data!.first;
+                              }
                               return DropdownButtonFormField<EventsModel>(
                                 isExpanded: true,
                                 decoration: InputDecoration(
@@ -104,6 +109,7 @@ class _CheckInScreenState extends State<CheckInScreen> {
                                 }).toList(),
                                 onChanged: (EventsModel? value) {
                                   setState(() {
+                                    stateController.updateEventId(value?.id);
                                     _selectedValue = value;
                                   });
                                 },
@@ -165,137 +171,5 @@ class _CheckInScreenState extends State<CheckInScreen> {
         ],
       ),
     );
-  }
-
-  Widget _buildQrView(BuildContext context) {
-    // For this example we check how width or tall the device is and change the scanArea and overlay accordingly.
-    var scanArea = (MediaQuery.of(context).size.width < 400 ||
-            MediaQuery.of(context).size.height < 400)
-        ? 200.0
-        : 300.0;
-    // To ensure the Scanner view is properly sizes after rotation
-    // we need to listen for Flutter SizeChanged notification and update controller
-    return Stack(children: [
-      Expanded(
-        child: QRView(
-          key: qrKey,
-          onQRViewCreated: _onQRViewCreated,
-          overlay: QrScannerOverlayShape(
-              borderColor: Colors.blue,
-              borderRadius: 10,
-              borderLength: 30,
-              borderWidth: 10,
-              cutOutSize: scanArea),
-          onPermissionSet: (ctrl, p) => _onPermissionSet(context, ctrl, p),
-        ),
-      ),
-      !isQrView
-          ? Padding(
-              padding: const EdgeInsets.only(bottom: 20),
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                child: FloatingActionButton(
-                  backgroundColor: Colors.white,
-                  onPressed: () {},
-                  child: Icon(Icons.camera),
-                ),
-              ),
-            )
-          : const SizedBox(),
-    ]);
-  }
-
-  void _onQRViewCreated(QRViewController controller) {
-    if (isQrView) {
-      setState(() {
-        this.controller = controller;
-      });
-      controller.scannedDataStream.listen((scanData) {
-        controller?.pauseCamera();
-        print(scanData?.code);
-
-        admitUser('qr', scanData?.code);
-
-        setState(() {
-          result = scanData;
-        });
-      });
-    }
-  }
-
-  void _onPermissionSet(BuildContext context, QRViewController ctrl, bool p) {
-    log('${DateTime.now().toIso8601String()}_onPermissionSet $p');
-    if (!p) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('no Permission')),
-      );
-    }
-  }
-
-  admitUser(type, code) async {
-    var res =
-        await AttendanceData().admitUser(type, _selectedValue?.id, code, 0);
-
-    var data;
-
-    try {
-      data = json.decode(res['data']);
-    } catch (e) {
-      data = [];
-    }
-
-    if (res['code'] == 200 || res['code'] == 201) {
-      MyToast.showCustom(
-          context,
-          Container(
-            height: 50,
-            decoration: BoxDecoration(
-                color: Colors.green[500],
-                borderRadius: const BorderRadius.all(Radius.circular(30))),
-            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                const Icon(Icons.done, color: Colors.white, size: 20),
-                Container(width: 10),
-                Text("Successfully admitted!",
-                    style: MyText.body1(context)!
-                        .copyWith(color: MyColors.grey_5)),
-                Container(width: 8),
-              ],
-            ),
-          ));
-    } else {
-      MyToast.showCustom(
-          context,
-          Container(
-            height: 50,
-            decoration: BoxDecoration(
-                color: Colors.red[600],
-                borderRadius: const BorderRadius.all(Radius.circular(30))),
-            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                const Icon(Icons.close, color: Colors.white, size: 20),
-                Container(width: 10),
-                Text(data.length > 0 ? data['message'] : "Error encountered!",
-                    style: MyText.body1(context)!
-                        .copyWith(color: MyColors.grey_5)),
-                Container(width: 8),
-              ],
-            ),
-          ));
-    }
-
-    controller?.resumeCamera();
-  }
-
-  @override
-  void dispose() {
-    controller?.dispose();
-    super.dispose();
   }
 }

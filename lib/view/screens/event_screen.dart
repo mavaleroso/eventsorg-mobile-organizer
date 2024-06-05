@@ -1,11 +1,14 @@
 import 'dart:convert';
 
+import 'package:eventsorg_mobile_organizer/controller/state_controller.dart';
 import 'package:eventsorg_mobile_organizer/data/events_data.dart';
 import 'package:eventsorg_mobile_organizer/data/my_colors.dart';
 import 'package:eventsorg_mobile_organizer/data/my_strings.dart';
 import 'package:eventsorg_mobile_organizer/model/events_model.dart';
+import 'package:eventsorg_mobile_organizer/view/screens/check_in_screen.dart';
 import 'package:eventsorg_mobile_organizer/view/screens/event_form_screen.dart';
 import 'package:eventsorg_mobile_organizer/view/screens/event_view_screen.dart';
+import 'package:eventsorg_mobile_organizer/view/screens/main_screen.dart';
 import 'package:eventsorg_mobile_organizer/view/widgets/my_text.dart';
 import 'package:eventsorg_mobile_organizer/view/widgets/my_toast.dart';
 import 'package:flutter/material.dart';
@@ -260,6 +263,9 @@ class _EventScreenState extends State<EventScreen> {
   }
 
   void showSheet(context, eventId) {
+    final StateController stateController = Get.find();
+    stateController.updateEventId(eventId);
+
     showModalBottomSheet(
       context: context,
       builder: (BuildContext bc) {
@@ -271,7 +277,9 @@ class _EventScreenState extends State<EventScreen> {
               ListTile(
                 leading: const Icon(Icons.qr_code),
                 title: const Text("Scan"),
-                onTap: () {},
+                onTap: () {
+                  Get.off(() => MainScreen(currentIndex: 1));
+                },
               ),
               ListTile(
                 leading: const Icon(Icons.calendar_view_month),

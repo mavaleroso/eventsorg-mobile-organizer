@@ -15,9 +15,10 @@ class AttendanceData {
       'is_paid': isPaid
     };
 
+    print(data);
+
     var res = await CallApi().postData(data, 'admit');
 
-    print(res);
     return res;
   }
 }

@@ -1,4 +1,5 @@
 import 'package:eventsorg_mobile_organizer/context/api.dart';
+import 'package:eventsorg_mobile_organizer/controller/state_controller.dart';
 import 'package:eventsorg_mobile_organizer/data/img.dart';
 import 'package:eventsorg_mobile_organizer/model/bottom_nav.dart';
 import 'package:eventsorg_mobile_organizer/view/screens/attendance_screen.dart';
@@ -79,6 +80,8 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    Get.put(StateController());
+
     this.context = context;
     return PopScope(
       canPop: false,
