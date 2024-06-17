@@ -8,11 +8,13 @@ import 'package:eventsorg_mobile_organizer/model/events_model.dart';
 import 'package:eventsorg_mobile_organizer/view/screens/check_in_screen.dart';
 import 'package:eventsorg_mobile_organizer/view/screens/event_form_screen.dart';
 import 'package:eventsorg_mobile_organizer/view/screens/event_view_screen.dart';
+import 'package:eventsorg_mobile_organizer/view/screens/login_screen.dart';
 import 'package:eventsorg_mobile_organizer/view/screens/main_screen.dart';
 import 'package:eventsorg_mobile_organizer/view/widgets/my_text.dart';
 import 'package:eventsorg_mobile_organizer/view/widgets/my_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class EventScreen extends StatefulWidget {
   const EventScreen({super.key});
@@ -48,6 +50,7 @@ class _EventScreenState extends State<EventScreen> {
   Future<List<EventsModel>> getEvents(page) async {
     var response = await EventsData().getEventsList(page);
     var data = json.decode(response['data']);
+
     List body = data['data'];
     setState(() {
       paginationFrom = data['meta']['from'] ?? 0;
@@ -264,7 +267,6 @@ class _EventScreenState extends State<EventScreen> {
 
   void showSheet(context, eventId) {
     final StateController stateController = Get.find();
-    stateController.updateEventId(eventId);
 
     showModalBottomSheet(
       context: context,
@@ -278,7 +280,8 @@ class _EventScreenState extends State<EventScreen> {
                 leading: const Icon(Icons.qr_code),
                 title: const Text("Scan"),
                 onTap: () {
-                  Get.off(() => MainScreen(currentIndex: 1));
+                  stateController.updateEventId(eventId);
+                  Get.offAll(() => MainScreen(currentIndex: 1));
                 },
               ),
               ListTile(

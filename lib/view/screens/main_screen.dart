@@ -82,6 +82,8 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     Get.put(StateController());
 
+    final StateController stateController = Get.find();
+
     this.context = context;
     return PopScope(
       canPop: false,

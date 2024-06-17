@@ -88,6 +88,8 @@ class _CheckInScreenState extends State<CheckInScreen> {
                                     .first;
                               } else {
                                 _selectedValue = eventSnapshot.data!.first;
+                                stateController
+                                    .updateEventId(_selectedValue?.id);
                               }
                               return DropdownButtonFormField<EventsModel>(
                                 isExpanded: true,

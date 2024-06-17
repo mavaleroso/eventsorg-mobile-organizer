@@ -1,6 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:eventsorg_mobile_organizer/view/widgets/my_text.dart';
+import 'package:eventsorg_mobile_organizer/view/widgets/my_toast.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:html/parser.dart';
@@ -87,5 +91,29 @@ class Tools {
     } catch (e) {
       return date;
     }
+  }
+
+  static FToast toastEvent(BuildContext context, description) {
+    return MyToast.showCustom(
+        context,
+        Container(
+          height: 50,
+          decoration: BoxDecoration(
+              color: Colors.green[500],
+              borderRadius: const BorderRadius.all(Radius.circular(30))),
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              const Icon(Icons.done, color: Colors.white, size: 20),
+              Container(width: 10),
+              Text("Successfully created!",
+                  style:
+                      MyText.body1(context)!.copyWith(color: MyColors.grey_5)),
+              Container(width: 8),
+            ],
+          ),
+        ));
   }
 }

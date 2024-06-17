@@ -1,4 +1,9 @@
 import 'dart:convert';
+import 'package:eventsorg_mobile_organizer/utils/tools.dart';
+import 'package:eventsorg_mobile_organizer/view/screens/login_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
 import './config.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -21,7 +26,7 @@ class CallApi {
         'Authorization': 'Bearer $_token',
       };
 
-  _errorHandler(res) {
+  _errorHandler(res) async {
     var data = 'Test';
 
     switch (res.statusCode) {
@@ -42,6 +47,19 @@ class CallApi {
         {
           var arr = json.decode(res.body);
           data = json.encode(arr['message']);
+          if (data == '"Unauthenticated."') {
+            Get.snackbar('Error!', 'Unauthenticated.',
+                snackPosition: SnackPosition.TOP,
+                icon: const Icon(Icons.cancel, color: Colors.white),
+                colorText: Colors.white,
+                backgroundColor: Colors.red[500]);
+
+            final prefs = await SharedPreferences.getInstance();
+            prefs.setBool('isLoggedIn', false);
+            prefs.remove('email');
+            prefs.remove('token');
+            Get.to(() => const LoginScreen());
+          }
         }
         break;
 

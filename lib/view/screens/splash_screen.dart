@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:eventsorg_mobile_organizer/view/screens/check_in_breakfast_stub.dart';
 import 'package:eventsorg_mobile_organizer/view/screens/event_form_screen.dart';
 import 'package:eventsorg_mobile_organizer/view/screens/event_view_screen.dart';
 import 'package:eventsorg_mobile_organizer/view/screens/login_screen.dart';
@@ -23,8 +24,9 @@ class SplashScreen extends StatelessWidget {
       final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
 
       Get.to(
-          () => isLoggedIn ? MainScreen(currentIndex: 0) : const LoginScreen());
-      // () => isLoggedIn ? EventViewScreen(id: 0) : const LoginScreen());
+          // () => isLoggedIn ? MainScreen(currentIndex: 0) : const LoginScreen());
+          () =>
+              isLoggedIn ? const CheckInBreakfastStub() : const LoginScreen());
     });
     return Scaffold(
       backgroundColor: MyColors.grey_90,

@@ -3,11 +3,7 @@ import 'package:intl/intl.dart';
 
 class EventsData {
   getEventsList(page) async {
-    DateTime now = DateTime.now();
-    String formattedDate = DateFormat('yyyy-MM-dd').format(now);
-
-    var res = await CallApi().getData(
-        'events?start_date=$formattedDate&end_date=$formattedDate&page=$page&limit=10');
+    var res = await CallApi().getData('events?page=$page&limit=10');
     return res;
   }
 

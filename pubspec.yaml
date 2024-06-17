@@ -52,6 +52,7 @@ dependencies:
   webview_flutter: ^4.7.0
   qr_code_scanner: ^1.0.1
   camera: ^0.11.0+1
+  qr_flutter: ^4.1.0
 
 dev_dependencies:
   flutter_test:
@@ -102,6 +103,11 @@ flutter:
   #       - asset: fonts/TrajanPro.ttf
   #       - asset: fonts/TrajanPro_Bold.ttf
   #         weight: 700
+  fonts:
+    - family: MazdaTypeRegular
+      fonts:
+        - asset: fonts/mazda_type_regular.ttf
+          weight: 700
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
