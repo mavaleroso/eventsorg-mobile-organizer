@@ -4,7 +4,11 @@ import 'package:eventsorg_mobile_organizer/view/widgets/my_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:printing/printing.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:screenshot/screenshot.dart';
 
 class CheckInBreakfastStub extends StatefulWidget {
   const CheckInBreakfastStub({super.key});
@@ -15,6 +19,8 @@ class CheckInBreakfastStub extends StatefulWidget {
 }
 
 class _CheckInBreakfastStubState extends State<CheckInBreakfastStub> {
+  ScreenshotController screenshotController = ScreenshotController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,72 +47,93 @@ class _CheckInBreakfastStubState extends State<CheckInBreakfastStub> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
-              'MIATA',
-              style: TextStyle(
-                fontFamily: 'MazdaTypeRegular',
-                fontSize: 90.4,
-                fontWeight: FontWeight.bold,
-                height: .8,
+            Screenshot(
+              controller: screenshotController,
+              child: Column(
+                children: [
+                  const Text(
+                    'MIATA',
+                    style: TextStyle(
+                      fontFamily: 'MazdaTypeRegular',
+                      fontSize: 90.4,
+                      fontWeight: FontWeight.bold,
+                      height: .8,
+                    ),
+                  ),
+                  const Text(
+                    'CLUB PHILIPPINES',
+                    style: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
+                      height: .8,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'BREAKFAST STAB',
+                    style: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  QrImageView(
+                    data: '667f9581-ccf5-478a-8fcc-8bd448292d93',
+                    version: QrVersions.auto,
+                    size: 200.0,
+                  ),
+                  Text(
+                    ('John Doe').toUpperCase(),
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'June 2024 Monthly Meeting',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const Text(
+                    'Makati City',
+                    style: TextStyle(
+                      fontSize: 20,
+                    ),
+                  ),
+                  const Text(
+                    'Jun-17-2024',
+                    style: TextStyle(
+                      fontSize: 20,
+                    ),
+                  ),
+                ],
               ),
             ),
-            const Text(
-              'CLUB PHILIPPINES',
-              style: TextStyle(
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
-                height: .8,
-              ),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'BREAKFAST STAB',
-              style: TextStyle(
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            QrImageView(
-              data: '667f9581-ccf5-478a-8fcc-8bd448292d93',
-              version: QrVersions.auto,
-              size: 200.0,
-            ),
-            Text(
-              ('John Doe').toUpperCase(),
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'June 2024 Monthly Meeting',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const Text(
-              'Makati City',
-              style: TextStyle(
-                fontSize: 20,
-              ),
-            ),
-            const Text(
-              'Jun-17-2024',
-              style: TextStyle(
-                fontSize: 20,
-              ),
-            ),
-            const SizedBox(height: 40),
-            ElevatedButton(
-              onPressed: () {
-                // Add print functionality
-              },
-              child: const Text(
-                'Print',
-                style: TextStyle(
-                  fontSize: 15,
+            const SizedBox(height: 50),
+            SizedBox(
+              width: 300, // Set the desired width here
+              child: ElevatedButton(
+                onPressed: () {
+                  screenshotController
+                      .capture(delay: Duration(milliseconds: 10))
+                      .then((capturedImage) async {
+                    printDoc(capturedImage!);
+                  }).catchError((onError) {
+                    print(onError);
+                  });
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue[900],
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: const Text(
+                  'Print',
+                  style: TextStyle(fontSize: 16),
                 ),
               ),
             ),
@@ -114,5 +141,21 @@ class _CheckInBreakfastStubState extends State<CheckInBreakfastStub> {
         ),
       ),
     );
+  }
+
+  Future<void> printDoc(image) async {
+    final doc = pw.Document();
+    doc.addPage(
+      pw.Page(
+        build: (pw.Context context) {
+          return pw.Expanded(
+            child: pw.Center(child: pw.Image(pw.MemoryImage(image))),
+          ); //getting error here
+        },
+      ),
+    );
+
+    await Printing.layoutPdf(
+        onLayout: (PdfPageFormat format) async => doc.save());
   }
 }
