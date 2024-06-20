@@ -1,7 +1,7 @@
 import 'package:eventsorg_mobile_organizer/context/api.dart';
+import 'package:eventsorg_mobile_organizer/data/my_colors.dart';
 import 'package:eventsorg_mobile_organizer/view/screens/main_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../data/img.dart';
@@ -20,6 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool invalidCredentials = false;
   bool invalidEntries = false;
   bool isLoading = false;
+  bool isHidePassword = true;
 
   _login(ctxOvly) async {
     String email = emailController.text;
@@ -54,7 +55,10 @@ class _LoginScreenState extends State<LoginScreen> {
       prefs.setBool('isLoggedIn', true);
       prefs.setString('email', email);
       prefs.setString('token', token);
-      Get.to(() => MainScreen(currentIndex: 0));
+      Get.to(() => MainScreen(
+            currentIndex: 0,
+            eventId: 0,
+          ));
       setState(() {
         invalidEntries = false;
         invalidCredentials = false;
@@ -78,14 +82,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      backgroundColor: Colors.blueGrey[900],
-      appBar: AppBar(
-        systemOverlayStyle: SystemUiOverlayStyle(
-            statusBarIconBrightness: Brightness.light,
-            statusBarColor: Colors.blueGrey[900]),
-        toolbarHeight: 0,
-        elevation: 0,
-      ),
+      backgroundColor: MyColors.grey_3,
       body: Container(
         padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 30),
         width: double.infinity,
@@ -99,7 +96,7 @@ class _LoginScreenState extends State<LoginScreen> {
               height: 80,
               child: Image.asset(
                 Img.get('logo_small_round.png'),
-                color: Colors.blue[300],
+                color: MyColors.primary,
               ),
             ),
             SizedBox(
@@ -108,11 +105,12 @@ class _LoginScreenState extends State<LoginScreen> {
               child: TextButton(
                 style:
                     TextButton.styleFrom(foregroundColor: Colors.transparent),
-                child: Text(
+                child: const Text(
                   "MiataClubPh",
                   style: TextStyle(
-                    color: Colors.grey[300],
+                    color: MyColors.primary,
                     fontSize: 17,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 onPressed: () {},
@@ -147,39 +145,49 @@ class _LoginScreenState extends State<LoginScreen> {
             const SizedBox(height: 20),
             TextField(
               keyboardType: TextInputType.text,
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.black),
               controller: emailController,
               enabled: !isLoading,
-              decoration: InputDecoration(
-                labelText: "Email",
-                labelStyle: TextStyle(color: Colors.blueGrey[400]),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide:
-                      BorderSide(color: Colors.blueGrey[400]!, width: 1),
-                ),
-                focusedBorder: UnderlineInputBorder(
-                  borderSide:
-                      BorderSide(color: Colors.blueGrey[400]!, width: 2),
+              decoration: const InputDecoration(
+                hintText: "Email",
+                prefixIcon: Icon(Icons.email),
+                prefixIconColor: MyColors.primary,
+                filled: true,
+                fillColor: MyColors.grey_10,
+                labelStyle: TextStyle(color: Colors.black),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(15)),
+                  borderSide: BorderSide.none,
                 ),
               ),
             ),
             Container(height: 25),
             TextField(
               keyboardType: TextInputType.text,
-              style: const TextStyle(color: Colors.white),
-              obscureText: true,
+              style: const TextStyle(color: Colors.black),
+              obscureText: isHidePassword,
               controller: passwordController,
               enabled: !isLoading,
               decoration: InputDecoration(
-                labelText: "Password",
-                labelStyle: TextStyle(color: Colors.blueGrey[400]),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide:
-                      BorderSide(color: Colors.blueGrey[400]!, width: 1),
+                hintText: "Password",
+                filled: true,
+                fillColor: MyColors.grey_10,
+                prefixIcon: const Icon(Icons.password),
+                prefixIconColor: MyColors.primary,
+                labelStyle: const TextStyle(color: Colors.black),
+                border: const OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(15)),
+                  borderSide: BorderSide.none,
                 ),
-                focusedBorder: UnderlineInputBorder(
-                  borderSide:
-                      BorderSide(color: Colors.blueGrey[400]!, width: 2),
+                suffixIcon: IconButton(
+                  onPressed: () => {
+                    setState(() {
+                      isHidePassword = !isHidePassword;
+                    })
+                  },
+                  icon: Icon(isHidePassword
+                      ? Icons.remove_red_eye_outlined
+                      : Icons.remove_red_eye),
                 ),
               ),
             ),
@@ -189,38 +197,27 @@ class _LoginScreenState extends State<LoginScreen> {
               height: 40,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue[300],
+                  backgroundColor: MyColors.primary,
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20)),
+                      borderRadius: BorderRadius.circular(15)),
                 ),
                 child: isLoading
-                    ? const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(Colors.white),
-                              strokeWidth:
-                                  2.0, // Optional: Adjust the thickness of the progress indicator
-                            ),
-                          ),
-                          SizedBox(width: 20),
-                          Text(
-                            'Loading...',
-                            style: TextStyle(
-                              fontSize: 15,
-                            ),
-                          ),
-                        ],
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
+                          strokeWidth:
+                              2.0, // Optional: Adjust the thickness of the progress indicator
+                        ),
                       )
                     : const Text(
                         'Login',
                         style: TextStyle(
-                          fontSize: 15,
-                        ),
+                            fontSize: 15,
+                            color: MyColors.grey_3,
+                            fontWeight: FontWeight.bold),
                       ),
                 onPressed: () {
                   _login(context);

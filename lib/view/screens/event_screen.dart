@@ -94,7 +94,7 @@ class _EventScreenState extends State<EventScreen> {
             ),
             Container(
               padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
-              color: MyColors.grey_3,
+              color: Colors.white,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -151,6 +151,7 @@ class _EventScreenState extends State<EventScreen> {
               return Container(
                 padding: const EdgeInsets.fromLTRB(15, 5, 15, 5),
                 child: Card(
+                    color: MyColors.grey_3,
                     margin: const EdgeInsets.all(0),
                     elevation: 2,
                     shape: RoundedRectangleBorder(
@@ -266,8 +267,6 @@ class _EventScreenState extends State<EventScreen> {
   }
 
   void showSheet(context, eventId) {
-    final StateController stateController = Get.find();
-
     showModalBottomSheet(
       context: context,
       builder: (BuildContext bc) {
@@ -280,8 +279,10 @@ class _EventScreenState extends State<EventScreen> {
                 leading: const Icon(Icons.qr_code),
                 title: const Text("Scan"),
                 onTap: () {
-                  stateController.updateEventId(eventId);
-                  Get.offAll(() => MainScreen(currentIndex: 1));
+                  Get.offAll(() => MainScreen(
+                        currentIndex: 1,
+                        eventId: eventId,
+                      ));
                 },
               ),
               ListTile(

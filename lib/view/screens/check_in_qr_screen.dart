@@ -6,6 +6,7 @@ import 'package:eventsorg_mobile_organizer/controller/state_controller.dart';
 import 'package:eventsorg_mobile_organizer/data/attendance_data.dart';
 import 'package:eventsorg_mobile_organizer/data/events_data.dart';
 import 'package:eventsorg_mobile_organizer/data/my_colors.dart';
+import 'package:eventsorg_mobile_organizer/view/screens/breakfast_stub.dart';
 import 'package:eventsorg_mobile_organizer/view/widgets/my_text.dart';
 import 'package:eventsorg_mobile_organizer/view/widgets/my_toast.dart';
 import 'package:flutter/material.dart';
@@ -99,6 +100,10 @@ class _CheckInQrScreenState extends State<CheckInQrScreen> {
           ));
 
       controller?.resumeCamera();
+
+      stateController.updateScannedUserInfo(
+          '${data['data']['first_name']}  ${data['data']['last_name']}');
+      Get.to(() => BreakfastStub(code: code));
     } else {
       if (data['message'] == 'User has not joined yet.') {
         addMember(context, stateController.eventId, code);
@@ -208,6 +213,8 @@ class _CheckInQrScreenState extends State<CheckInQrScreen> {
                           ],
                         ),
                       ));
+
+                  admitUser(userIdNo);
                 } else {
                   MyToast.showCustom(
                       context,

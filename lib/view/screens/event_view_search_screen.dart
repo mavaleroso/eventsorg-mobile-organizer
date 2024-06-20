@@ -1,9 +1,11 @@
 import 'dart:convert';
 
+import 'package:eventsorg_mobile_organizer/controller/state_controller.dart';
 import 'package:eventsorg_mobile_organizer/data/events_data.dart';
 import 'package:eventsorg_mobile_organizer/data/my_colors.dart';
 import 'package:eventsorg_mobile_organizer/data/users_data.dart';
 import 'package:eventsorg_mobile_organizer/model/users_model.dart';
+import 'package:eventsorg_mobile_organizer/view/screens/breakfast_stub.dart';
 import 'package:eventsorg_mobile_organizer/view/screens/event_view_screen.dart';
 import 'package:eventsorg_mobile_organizer/view/widgets/my_text.dart';
 import 'package:eventsorg_mobile_organizer/view/widgets/my_toast.dart';
@@ -144,6 +146,8 @@ class _EventViewSearchScreenState extends State<EventViewSearchScreen> {
   }
 
   Widget buildContent(List<UsersModel> users) {
+    StateController stateController = Get.find();
+
     return Column(
       children: [
         Expanded(
@@ -168,6 +172,8 @@ class _EventViewSearchScreenState extends State<EventViewSearchScreen> {
                             children: <Widget>[
                               ListTile(
                                 onTap: () {
+                                  stateController.updateScannedUserInfo(
+                                      '${result.users.firstName} ${result.users.lastName}');
                                   addMember(
                                       context, widget.id, result.users.idNo);
                                 },
@@ -313,7 +319,7 @@ class _EventViewSearchScreenState extends State<EventViewSearchScreen> {
                 }
 
                 Navigator.of(context).pop();
-                Get.to(() => EventViewScreen(id: eventId));
+                Get.to(() => BreakfastStub(code: userIdNo));
               },
             )
           ],

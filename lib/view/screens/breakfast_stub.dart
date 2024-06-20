@@ -1,3 +1,4 @@
+import 'package:eventsorg_mobile_organizer/controller/state_controller.dart';
 import 'package:eventsorg_mobile_organizer/data/my_colors.dart';
 import 'package:eventsorg_mobile_organizer/view/screens/main_screen.dart';
 import 'package:eventsorg_mobile_organizer/view/widgets/my_text.dart';
@@ -10,16 +11,18 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:screenshot/screenshot.dart';
 
-class CheckInBreakfastStub extends StatefulWidget {
-  const CheckInBreakfastStub({super.key});
+class BreakfastStub extends StatefulWidget {
+  String code;
+  BreakfastStub({super.key, required this.code});
 
   @override
   // ignore: library_private_types_in_public_api
-  _CheckInBreakfastStubState createState() => _CheckInBreakfastStubState();
+  _BreakfastStubState createState() => _BreakfastStubState();
 }
 
-class _CheckInBreakfastStubState extends State<CheckInBreakfastStub> {
+class _BreakfastStubState extends State<BreakfastStub> {
   ScreenshotController screenshotController = ScreenshotController();
+  StateController stateController = Get.find();
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +42,7 @@ class _CheckInBreakfastStubState extends State<CheckInBreakfastStub> {
         leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
             onPressed: () {
-              Get.offAll(() => MainScreen(currentIndex: 1));
+              Get.back();
               // Navigator.pop(context);
             }),
       ),
@@ -70,41 +73,41 @@ class _CheckInBreakfastStubState extends State<CheckInBreakfastStub> {
                   ),
                   const SizedBox(height: 20),
                   const Text(
-                    'BREAKFAST STAB',
+                    'BREAKFAST STUB',
                     style: TextStyle(
                       fontSize: 30,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   QrImageView(
-                    data: '667f9581-ccf5-478a-8fcc-8bd448292d93',
+                    data: widget.code,
                     version: QrVersions.auto,
                     size: 200.0,
                   ),
                   Text(
-                    ('John Doe').toUpperCase(),
+                    (stateController.userFullname).toUpperCase(),
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    'June 2024 Monthly Meeting',
-                    style: TextStyle(
+                  Text(
+                    stateController.eventName,
+                    style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  const Text(
-                    'Makati City',
-                    style: TextStyle(
+                  Text(
+                    stateController.eventLocation,
+                    style: const TextStyle(
                       fontSize: 20,
                     ),
                   ),
-                  const Text(
-                    'Jun-17-2024',
-                    style: TextStyle(
+                  Text(
+                    stateController.eventStartDate,
+                    style: const TextStyle(
                       fontSize: 20,
                     ),
                   ),
@@ -117,7 +120,7 @@ class _CheckInBreakfastStubState extends State<CheckInBreakfastStub> {
               child: ElevatedButton(
                 onPressed: () {
                   screenshotController
-                      .capture(delay: Duration(milliseconds: 10))
+                      .capture(delay: const Duration(milliseconds: 10))
                       .then((capturedImage) async {
                     printDoc(capturedImage!);
                   }).catchError((onError) {

@@ -52,9 +52,10 @@ class _CheckInScreenState extends State<CheckInScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final StateController stateController = Get.find();
+    StateController stateController = Get.find();
 
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Column(
         children: <Widget>[
           Expanded(
@@ -88,9 +89,13 @@ class _CheckInScreenState extends State<CheckInScreen> {
                                     .first;
                               } else {
                                 _selectedValue = eventSnapshot.data!.first;
-                                stateController
-                                    .updateEventId(_selectedValue?.id);
                               }
+
+                              stateController.updateEventId(_selectedValue?.id);
+                              stateController.updateEventInfo(
+                                  _selectedValue?.name,
+                                  _selectedValue?.location,
+                                  _selectedValue?.startDate);
                               return DropdownButtonFormField<EventsModel>(
                                 isExpanded: true,
                                 decoration: InputDecoration(
@@ -112,6 +117,8 @@ class _CheckInScreenState extends State<CheckInScreen> {
                                 onChanged: (EventsModel? value) {
                                   setState(() {
                                     stateController.updateEventId(value?.id);
+                                    stateController.updateEventInfo(value?.name,
+                                        value?.location, value?.startDate);
                                     _selectedValue = value;
                                   });
                                 },

@@ -17,8 +17,8 @@ import '../widgets/my_toast.dart';
 
 class MainScreen extends StatefulWidget {
   int currentIndex = 0;
-
-  MainScreen({super.key, required this.currentIndex});
+  int eventId = 0;
+  MainScreen({super.key, required this.currentIndex, required this.eventId});
 
   final List<BottomNav> itemsNav = <BottomNav>[
     BottomNav('Events', Icons.event, null),
@@ -110,6 +110,7 @@ class _MainScreenState extends State<MainScreen> {
               }),
         ),
         drawer: Drawer(
+          backgroundColor: Colors.white,
           width: 250,
           child: SingleChildScrollView(
             child: Column(
@@ -159,11 +160,15 @@ class _MainScreenState extends State<MainScreen> {
           unselectedItemColor: MyColors.grey_40,
           currentIndex: widget.currentIndex,
           onTap: (int index) {
+            stateController.updateEventId(0);
+
             setState(() {
               widget.currentIndex = index;
             });
           },
           items: widget.itemsNav.map((BottomNav d) {
+            stateController.updateEventId(widget.eventId);
+
             return BottomNavigationBarItem(
               icon: Icon(d.icon),
               label: d.title,

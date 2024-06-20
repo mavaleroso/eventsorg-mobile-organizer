@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:eventsorg_mobile_organizer/controller/state_controller.dart';
 import 'package:eventsorg_mobile_organizer/data/events_data.dart';
 import 'package:eventsorg_mobile_organizer/data/my_colors.dart';
 import 'package:eventsorg_mobile_organizer/model/users_model.dart';
@@ -36,6 +37,8 @@ class _EventViewScreenState extends State<EventViewScreen> {
   }
 
   fetchEvent() async {
+    StateController stateController = Get.find();
+
     var response = await EventsData().getEvent(widget.id);
     var data = json.decode(response['data']);
 
@@ -45,13 +48,10 @@ class _EventViewScreenState extends State<EventViewScreen> {
       startDate = data['data']['start_date'];
       endDate = data['data']['end_date'];
     });
-  }
 
-  // Future<void> fetchEventUsers() async {
-  //   setState(() {
-  //     usersFuture = getUsers();
-  //   });
-  // }
+    stateController.updateEventInfo(data['data']['name'],
+        data['data']['location'], data['data']['start_date']);
+  }
 
   Future<List<UsersModel>> getUsers() async {
     var response = await EventsData().getEventUsers(widget.id);
@@ -63,6 +63,7 @@ class _EventViewScreenState extends State<EventViewScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
           "View Event",
@@ -78,7 +79,10 @@ class _EventViewScreenState extends State<EventViewScreen> {
         leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
             onPressed: () {
-              Get.to(() => MainScreen(currentIndex: 0));
+              Get.to(() => MainScreen(
+                    currentIndex: 0,
+                    eventId: 0,
+                  ));
               // Navigator.pop(context);
             }),
       ),
@@ -88,6 +92,7 @@ class _EventViewScreenState extends State<EventViewScreen> {
           Container(
             padding: const EdgeInsets.all(3),
             child: Card(
+              color: MyColors.grey_3,
               margin: const EdgeInsets.all(0),
               elevation: 2,
               shape: RoundedRectangleBorder(
@@ -198,6 +203,7 @@ class _EventViewScreenState extends State<EventViewScreen> {
               width: double.infinity,
               padding: const EdgeInsets.all(3),
               child: Card(
+                color: MyColors.grey_3,
                 margin: const EdgeInsets.all(0),
                 elevation: 2,
                 shape: RoundedRectangleBorder(
@@ -220,27 +226,32 @@ class _EventViewScreenState extends State<EventViewScreen> {
                       ),
                       const SizedBox(height: 10),
                       Expanded(
-                        child: Container(
-                          alignment: Alignment.topLeft,
-                          child: FutureBuilder(
-                            future: usersFuture,
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return const Center(
-                                    child: CircularProgressIndicator());
-                              } else if (snapshot.hasData &&
-                                  snapshot.data!.isNotEmpty) {
-                                var user = snapshot.data!;
-                                return buildContent(user);
-                              } else if (snapshot.data!.isEmpty) {
-                                return const Center(
-                                    child: Text("No user member"));
-                              } else {
-                                return const Center(
-                                    child: Text("No data available"));
-                              }
-                            },
+                        child: RefreshIndicator(
+                          onRefresh: () async {
+                            getUsers();
+                          },
+                          child: Container(
+                            alignment: Alignment.topLeft,
+                            child: FutureBuilder(
+                              future: usersFuture,
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return const Center(
+                                      child: CircularProgressIndicator());
+                                } else if (snapshot.hasData &&
+                                    snapshot.data!.isNotEmpty) {
+                                  var user = snapshot.data!;
+                                  return buildContent(user);
+                                } else if (snapshot.data!.isEmpty) {
+                                  return const Center(
+                                      child: Text("No user member"));
+                                } else {
+                                  return const Center(
+                                      child: Text("No data available"));
+                                }
+                              },
+                            ),
                           ),
                         ),
                       ),

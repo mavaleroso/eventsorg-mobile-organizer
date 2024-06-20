@@ -46,6 +46,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     var response = await EventsData().getEventsList(page);
     var data = json.decode(response['data']);
     List body = data['data'];
+    print(body);
     return body.map((e) => EventsModel.fromJson(e)).toList();
   }
 
@@ -70,115 +71,121 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     this.context = context;
     return Scaffold(
       backgroundColor: Colors.white,
-      body: FutureBuilder(
-          future: eventsFuture,
-          builder: (context, eventSnapshot) {
-            if (eventSnapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (eventSnapshot.hasData) {
-              var events = eventSnapshot.data!;
-              _selectedValue ??= eventSnapshot.data!.first;
-              attendanceFuture ??=
-                  getAttendance(paginationCurrentPage, _selectedValue?.id);
-              return Column(
-                children: [
-                  Card(
-                    margin: const EdgeInsets.all(0),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(0)),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 10, horizontal: 20),
-                      child: DropdownButtonFormField<EventsModel>(
-                        isExpanded: true,
-                        decoration: InputDecoration(
-                          prefixIcon: const Icon(Icons.event_note),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          getEvents(paginationCurrentPage);
+        },
+        child: FutureBuilder(
+            future: eventsFuture,
+            builder: (context, eventSnapshot) {
+              if (eventSnapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (eventSnapshot.hasData) {
+                var events = eventSnapshot.data!;
+                _selectedValue ??= eventSnapshot.data!.first;
+                attendanceFuture ??=
+                    getAttendance(paginationCurrentPage, _selectedValue?.id);
+                return Column(
+                  children: [
+                    Card(
+                      color: Colors.white,
+                      margin: const EdgeInsets.all(0),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(0)),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 10, horizontal: 20),
+                        child: DropdownButtonFormField<EventsModel>(
+                          isExpanded: true,
+                          decoration: InputDecoration(
+                            prefixIcon: const Icon(Icons.event_note),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            labelText: 'Event',
+                            isDense: true,
                           ),
-                          labelText: 'Event',
-                          isDense: true,
+                          items: events.map<DropdownMenuItem<EventsModel>>(
+                              (EventsModel item) {
+                            return DropdownMenuItem<EventsModel>(
+                              value: item,
+                              child: Text(item.name!),
+                            );
+                          }).toList(),
+                          onChanged: (EventsModel? value) {
+                            setState(() {
+                              _selectedValue = value;
+                              attendanceFuture = getAttendance(
+                                  paginationCurrentPage, _selectedValue?.id);
+                            });
+                          },
+                          value: _selectedValue,
                         ),
-                        items: events.map<DropdownMenuItem<EventsModel>>(
-                            (EventsModel item) {
-                          return DropdownMenuItem<EventsModel>(
-                            value: item,
-                            child: Text(item.name!),
-                          );
-                        }).toList(),
-                        onChanged: (EventsModel? value) {
-                          setState(() {
-                            _selectedValue = value;
-                            attendanceFuture = getAttendance(
-                                paginationCurrentPage, _selectedValue?.id);
-                          });
-                        },
-                        value: _selectedValue,
                       ),
                     ),
-                  ),
-                  Expanded(
-                    child: Center(
-                      child: FutureBuilder(
-                        future: attendanceFuture,
-                        builder: (context, attendanceSnapshot) {
-                          if (attendanceSnapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const CircularProgressIndicator();
-                          } else if (attendanceSnapshot.hasData &&
-                              attendanceSnapshot.data!.isNotEmpty) {
-                            var attendance = attendanceSnapshot.data!;
-                            return buildAttendance(attendance);
-                          } else {
-                            return const Text("No attendance currently");
-                          }
-                        },
+                    Expanded(
+                      child: Center(
+                        child: FutureBuilder(
+                          future: attendanceFuture,
+                          builder: (context, attendanceSnapshot) {
+                            if (attendanceSnapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const CircularProgressIndicator();
+                            } else if (attendanceSnapshot.hasData &&
+                                attendanceSnapshot.data!.isNotEmpty) {
+                              var attendance = attendanceSnapshot.data!;
+                              return buildAttendance(attendance);
+                            } else {
+                              return const Text("No attendance currently");
+                            }
+                          },
+                        ),
                       ),
                     ),
-                  ),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
-                    color: MyColors.grey_3,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        IconButton(
-                          onPressed: () {
-                            if (paginationCurrentPage > 1 &&
-                                paginationPrevLink != '') {
-                              getAttendance(
-                                  paginationCurrentPage - 1, eventIdVar);
-                            }
-                          },
-                          icon: const Icon(Icons.arrow_left),
-                          iconSize: 35,
-                        ),
-                        Text(
-                          '$paginationFrom - $paginationTo of $paginationTotal items',
-                          style: MyText.body2(context)!
-                              .copyWith(color: MyColors.grey_90),
-                        ),
-                        IconButton(
-                          onPressed: () {
-                            if (paginationNextLink != '') {
-                              getAttendance(
-                                  paginationCurrentPage + 1, eventIdVar);
-                            }
-                          },
-                          icon: const Icon(Icons.arrow_right),
-                          iconSize: 35,
-                        ),
-                      ],
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 5, horizontal: 20),
+                      color: Colors.white,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              if (paginationCurrentPage > 1 &&
+                                  paginationPrevLink != '') {
+                                getAttendance(
+                                    paginationCurrentPage - 1, eventIdVar);
+                              }
+                            },
+                            icon: const Icon(Icons.arrow_left),
+                            iconSize: 35,
+                          ),
+                          Text(
+                            '$paginationFrom - $paginationTo of $paginationTotal items',
+                            style: MyText.body2(context)!
+                                .copyWith(color: MyColors.grey_90),
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              if (paginationNextLink != '') {
+                                getAttendance(
+                                    paginationCurrentPage + 1, eventIdVar);
+                              }
+                            },
+                            icon: const Icon(Icons.arrow_right),
+                            iconSize: 35,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              );
-            } else {
-              return const Center(child: Text("No events available"));
-            }
-          }),
+                  ],
+                );
+              } else {
+                return const Center(child: Text("No events available"));
+              }
+            }),
+      ),
     );
   }
 
@@ -193,6 +200,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
               return Container(
                 padding: const EdgeInsets.fromLTRB(15, 5, 15, 5),
                 child: Card(
+                    color: MyColors.grey_3,
                     margin: const EdgeInsets.all(0),
                     elevation: 2,
                     shape: RoundedRectangleBorder(
