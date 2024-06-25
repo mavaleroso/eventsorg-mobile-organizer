@@ -10,6 +10,7 @@ import 'package:eventsorg_mobile_organizer/view/widgets/my_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class CheckInPlateScreen extends StatefulWidget {
   const CheckInPlateScreen({super.key});
@@ -187,13 +188,14 @@ class _CheckInPlateScreenState extends State<CheckInPlateScreen> {
   }
 
   Future<http.Response> sendImageToPlateRecognizer(Uint8List imageBytes) async {
-    const url = 'https://api.platerecognizer.com/v1/plate-reader/';
+    print(dotenv.env['PLATERECOGNIZER_API']);
+    String? url = dotenv.env['PLATERECOGNIZER_API'];
     final headers = {
-      'Authorization': 'Token cb5950aca207e2eefdf93696fef6f30dea0e23dd',
+      'Authorization': 'Token ${dotenv.env['PLATERECOGNIZER_TOKEN']}',
       'Content-Type': 'multipart/form-data',
     };
 
-    final request = http.MultipartRequest('POST', Uri.parse(url))
+    final request = http.MultipartRequest('POST', Uri.parse(url!))
       ..headers.addAll(headers)
       ..files.add(http.MultipartFile.fromBytes(
         'upload',
