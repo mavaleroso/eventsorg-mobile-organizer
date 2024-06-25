@@ -269,9 +269,12 @@ class _EventScreenState extends State<EventScreen> {
   void showSheet(context, eventId) {
     showModalBottomSheet(
       context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+            top: Radius.circular(15.0), bottom: Radius.zero),
+      ),
       builder: (BuildContext bc) {
-        return Container(
-          color: Colors.white,
+        return Padding(
           padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 5),
           child: Wrap(
             children: <Widget>[

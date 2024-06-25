@@ -5,11 +5,9 @@ import 'package:eventsorg_mobile_organizer/data/events_data.dart';
 import 'package:eventsorg_mobile_organizer/data/my_colors.dart';
 import 'package:eventsorg_mobile_organizer/model/users_model.dart';
 import 'package:eventsorg_mobile_organizer/view/screens/event_view_search_screen.dart';
-import 'package:eventsorg_mobile_organizer/view/screens/main_screen.dart';
 import 'package:eventsorg_mobile_organizer/view/widgets/my_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:get/get.dart';
 
 class EventViewScreen extends StatefulWidget {
@@ -27,19 +25,35 @@ class _EventViewScreenState extends State<EventViewScreen> {
   String startDate = '';
   String endDate = '';
 
-  late Future<List<UsersModel>> usersFuture = getUsers();
+  int paginationFrom = 0;
+  int paginationTo = 0;
+  int paginationTotal = 0;
+  String paginationPrevLink = '';
+  String paginationNextLink = '';
+  int paginationCurrentPage = 1;
+
+  late Future<List<UsersModel>> usersFuture;
 
   @override
   void initState() {
     fetchEvent();
-    // fetchEventUsers();
+    fetchEventUsers(1);
     super.initState();
+  }
+
+  Future<void> fetchEventUsers(page) async {
+    setState(() {
+      usersFuture = getUsers(page);
+    });
   }
 
   fetchEvent() async {
     StateController stateController = Get.find();
 
     var response = await EventsData().getEvent(widget.id);
+
+    if (response == '') return;
+
     var data = json.decode(response['data']);
 
     setState(() {
@@ -53,10 +67,18 @@ class _EventViewScreenState extends State<EventViewScreen> {
         data['data']['location'], data['data']['start_date']);
   }
 
-  Future<List<UsersModel>> getUsers() async {
-    var response = await EventsData().getEventUsers(widget.id);
+  Future<List<UsersModel>> getUsers(page) async {
+    var response = await EventsData().getEventUsers(widget.id, page);
     var data = json.decode(response['data']);
     List body = data['data'];
+    setState(() {
+      paginationFrom = data['meta']['from'] ?? 0;
+      paginationTo = data['meta']['to'] ?? 0;
+      paginationTotal = data['meta']['total'] ?? 0;
+      paginationPrevLink = data['links']['prev'] ?? '';
+      paginationNextLink = data['links']['next'] ?? '';
+      paginationCurrentPage = data['meta']['current_page'] ?? 1;
+    });
     return body.map((e) => UsersModel.fromJson(e)).toList();
   }
 
@@ -79,14 +101,10 @@ class _EventViewScreenState extends State<EventViewScreen> {
         leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
             onPressed: () {
-              Get.to(() => MainScreen(
-                    currentIndex: 0,
-                    eventId: 0,
-                  ));
+              Get.back();
               // Navigator.pop(context);
             }),
       ),
-      floatingActionButton: buildSpeedDial(),
       body: Column(
         children: [
           Container(
@@ -123,7 +141,7 @@ class _EventViewScreenState extends State<EventViewScreen> {
                             Row(
                               children: <Widget>[
                                 Text("Event name:",
-                                    style: MyText.body2(context)!
+                                    style: MyText.body1(context)!
                                         .copyWith(color: MyColors.grey_80)),
                                 const Spacer(),
                                 Expanded(
@@ -132,7 +150,7 @@ class _EventViewScreenState extends State<EventViewScreen> {
                                       softWrap: true,
                                       textAlign: TextAlign.right,
                                       overflow: TextOverflow.visible,
-                                      style: MyText.body2(context)!
+                                      style: MyText.body1(context)!
                                           .copyWith(color: MyColors.grey_100_)),
                                 ),
                               ],
@@ -140,7 +158,7 @@ class _EventViewScreenState extends State<EventViewScreen> {
                             Row(
                               children: <Widget>[
                                 Text("Location:",
-                                    style: MyText.body2(context)!
+                                    style: MyText.body1(context)!
                                         .copyWith(color: MyColors.grey_80)),
                                 const Spacer(),
                                 Expanded(
@@ -149,7 +167,7 @@ class _EventViewScreenState extends State<EventViewScreen> {
                                       softWrap: true,
                                       textAlign: TextAlign.right,
                                       overflow: TextOverflow.visible,
-                                      style: MyText.body2(context)!
+                                      style: MyText.body1(context)!
                                           .copyWith(color: MyColors.grey_100_)),
                                 ),
                               ],
@@ -157,7 +175,7 @@ class _EventViewScreenState extends State<EventViewScreen> {
                             Row(
                               children: <Widget>[
                                 Text("Start date:",
-                                    style: MyText.body2(context)!
+                                    style: MyText.body1(context)!
                                         .copyWith(color: MyColors.grey_80)),
                                 const Spacer(),
                                 Expanded(
@@ -166,7 +184,7 @@ class _EventViewScreenState extends State<EventViewScreen> {
                                       softWrap: true,
                                       textAlign: TextAlign.right,
                                       overflow: TextOverflow.visible,
-                                      style: MyText.body2(context)!
+                                      style: MyText.body1(context)!
                                           .copyWith(color: MyColors.grey_100_)),
                                 ),
                               ],
@@ -174,7 +192,7 @@ class _EventViewScreenState extends State<EventViewScreen> {
                             Row(
                               children: <Widget>[
                                 Text("End date:",
-                                    style: MyText.body2(context)!
+                                    style: MyText.body1(context)!
                                         .copyWith(color: MyColors.grey_80)),
                                 const Spacer(),
                                 Expanded(
@@ -183,7 +201,7 @@ class _EventViewScreenState extends State<EventViewScreen> {
                                       softWrap: true,
                                       textAlign: TextAlign.right,
                                       overflow: TextOverflow.visible,
-                                      style: MyText.body2(context)!
+                                      style: MyText.body1(context)!
                                           .copyWith(color: MyColors.grey_100_)),
                                 ),
                               ],
@@ -228,7 +246,7 @@ class _EventViewScreenState extends State<EventViewScreen> {
                       Expanded(
                         child: RefreshIndicator(
                           onRefresh: () async {
-                            getUsers();
+                            fetchEventUsers(paginationCurrentPage);
                           },
                           child: Container(
                             alignment: Alignment.topLeft,
@@ -243,7 +261,8 @@ class _EventViewScreenState extends State<EventViewScreen> {
                                     snapshot.data!.isNotEmpty) {
                                   var user = snapshot.data!;
                                   return buildContent(user);
-                                } else if (snapshot.data!.isEmpty) {
+                                } else if (snapshot.hasData &&
+                                    snapshot.data!.isEmpty) {
                                   return const Center(
                                       child: Text("No user member"));
                                 } else {
@@ -259,6 +278,49 @@ class _EventViewScreenState extends State<EventViewScreen> {
                   ),
                 ),
               ),
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
+            color: Colors.white,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                IconButton(
+                  onPressed: () {
+                    if (paginationCurrentPage > 1 && paginationPrevLink != '') {
+                      fetchEventUsers(paginationCurrentPage - 1);
+                    }
+                  },
+                  icon: const Icon(Icons.arrow_left),
+                  iconSize: 35,
+                ),
+                Text(
+                  '$paginationFrom - $paginationTo of $paginationTotal items',
+                  style:
+                      MyText.body2(context)!.copyWith(color: MyColors.grey_90),
+                ),
+                IconButton(
+                  onPressed: () {
+                    if (paginationNextLink != '') {
+                      fetchEventUsers(paginationCurrentPage + 1);
+                    }
+                  },
+                  icon: const Icon(Icons.arrow_right),
+                  iconSize: 35,
+                ),
+                const Spacer(),
+                IconButton(
+                  onPressed: () {
+                    setState(() {
+                      Get.to(() => EventViewSearchScreen(id: widget.id));
+                    });
+                  },
+                  icon: const Icon(Icons.person_add),
+                  iconSize: 35,
+                ),
+              ],
             ),
           ),
         ],
@@ -284,28 +346,5 @@ class _EventViewScreenState extends State<EventViewScreen> {
             ],
           );
         });
-  }
-
-  Widget buildSpeedDial() {
-    return SpeedDial(
-      elevation: 2,
-      animatedIcon: AnimatedIcons.menu_close,
-      animatedIconTheme: const IconThemeData(color: Colors.white),
-      curve: Curves.linear,
-      overlayColor: Colors.black,
-      overlayOpacity: 0.2,
-      backgroundColor: MyColors.primary,
-      children: [
-        SpeedDialChild(
-          elevation: 2,
-          label: "Add member",
-          child: const Icon(Icons.person_add, color: MyColors.grey_80),
-          backgroundColor: Colors.white,
-          onTap: () {
-            Get.to(() => EventViewSearchScreen(id: widget.id));
-          },
-        ),
-      ],
-    );
   }
 }

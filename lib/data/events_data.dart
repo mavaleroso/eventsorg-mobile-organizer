@@ -17,8 +17,8 @@ class EventsData {
     return res;
   }
 
-  getEventUsers(id) async {
-    var res = await CallApi().getData('events/$id/users');
+  getEventUsers(id, page) async {
+    var res = await CallApi().getData('events/$id/users?page=$page&limit=10');
     return res;
   }
 

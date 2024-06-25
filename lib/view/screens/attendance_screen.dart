@@ -46,7 +46,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     var response = await EventsData().getEventsList(page);
     var data = json.decode(response['data']);
     List body = data['data'];
-    print(body);
     return body.map((e) => EventsModel.fromJson(e)).toList();
   }
 
@@ -101,6 +100,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                             prefixIcon: const Icon(Icons.event_note),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(color: Colors.black),
                             ),
                             labelText: 'Event',
                             isDense: true,

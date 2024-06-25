@@ -74,10 +74,7 @@ class _EventFormScreenState extends State<EventFormScreen> {
         leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
             onPressed: () {
-              Get.to(() => MainScreen(
-                    currentIndex: 0,
-                    eventId: 0,
-                  ));
+              Get.back();
               // Navigator.pop(context);
             }),
       ),

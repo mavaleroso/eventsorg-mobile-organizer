@@ -39,7 +39,6 @@ class _MainScreenState extends State<MainScreen> {
     var res = await CallApi().postData({}, 'logout');
     if (res['code'] == 200) {
       final prefs = await SharedPreferences.getInstance();
-      prefs.setBool('isLoggedIn', false);
       prefs.remove('email');
       prefs.remove('token');
       Get.to(() => const LoginScreen());

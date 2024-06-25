@@ -52,7 +52,6 @@ class _LoginScreenState extends State<LoginScreen> {
       Map<String, dynamic> decodedResponse = jsonDecode(res['data']);
       String token = decodedResponse['token'];
       final prefs = await SharedPreferences.getInstance();
-      prefs.setBool('isLoggedIn', true);
       prefs.setString('email', email);
       prefs.setString('token', token);
       Get.to(() => MainScreen(

@@ -55,7 +55,6 @@ class CallApi {
                 backgroundColor: Colors.red[500]);
 
             final prefs = await SharedPreferences.getInstance();
-            prefs.setBool('isLoggedIn', false);
             prefs.remove('email');
             prefs.remove('token');
             Get.to(() => const LoginScreen());
@@ -164,6 +163,8 @@ class CallApi {
   getData(apiUrl) async {
     var baseUrl = await _getSharedPreferenceBaseUrl();
     var fullUrl = baseUrl + apiUrl;
+
+    print(fullUrl);
 
     try {
       var response = await http.get(
